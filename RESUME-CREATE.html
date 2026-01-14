@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能简历生成器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 550px 1fr;
+            gap: 20px;
+        }
+
+        .form-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+
+        .preview-panel {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #607052;
+        }
+
+        .form-section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+        }
+
+        .form-section h3 {
+            color: #607052;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .form-group small {
+            color: #999;
+            font-size: 12px;
+            display: block;
+            margin-top: 3px;
+        }
+
+        .color-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .color-input {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .color-input input[type="color"] {
+            width: 50px;
+            height: 35px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .color-input input[type="text"] {
+            flex: 1;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #607052;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4d5a42;
+        }
+
+        .btn-secondary {
+            background: #A9B488;
+            color: white;
+            margin-left: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #8a9470;
+        }
+
+        .btn-add {
+            background: #B99471;
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-add:hover {
+            background: #9a7a5d;
+        }
+
+        .btn-remove {
+            background: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .btn-remove:hover {
+            background: #c82333;
+        }
+
+        .dynamic-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            position: relative;
+            border: 1px solid #e9ecef;
+        }
+
+        .dynamic-item .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .dynamic-item .item-header h4 {
+            color: #607052;
+            font-size: 15px;
+            margin: 0;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .nested-item {
+            background: white;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            border: 1px solid #dee2e6;
+        }
+
+        .nested-item .item-header {
+            margin-bottom: 10px;
+        }
+
+        .list-input-group {
+            margin-bottom: 10px;
+        }
+
+        .list-input-item {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+
+        .list-input-item input {
+            flex: 1;
+        }
+
+        .list-input-item button {
+            padding: 8px 12px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn-add-small {
+            background: #28a745;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        #resumePreview {
+            min-height: 800px;
+        }
+
+        .checkbox-group {
+            margin-top: 10px;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+
+        @media print {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .form-panel {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 表单面板 -->
+        <div class="form-panel">
+
+            <h2>📝 简历生成器( ఠൠఠ )ﾉ</h2>
+			<span style="color:#9071b7;">author:晚晚</span></br>
+<br>
+			<span style="color: #fc1d55;">莫兰迪配色你值得拥有!</span><br><br>
+            <!-- 配色方案 -->
+            <div class="form-section">
+                <h3>🎨 配色方案</h3>
+                <div class="color-group">
+                    <div class="form-group">
+                        <label>主色调（深色）</label>
+                        <div class="color-input">
+                            <input type="color" id="color1" value="#607052">
+                            <input type="text" id="color1Text" value="#607052">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>辅助色（中色）</label>
+                        <div class="color-input">
+                            <input type="color" id="color2" value="#A9B488">
+                            <input type="text" id="color2Text" value="#A9B488">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>背景色（浅色）</label>
+                        <div class="color-input">
+                            <input type="color" id="color3" value="#FEFAE0">
+                            <input type="text" id="color3Text" value="#FEFAE0">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>强调色（点缀）</label>
+                        <div class="color-input">
+                            <input type="color" id="color4" value="#B99471">
+                            <input type="text" id="color4Text" value="#B99471">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 基本信息 -->
+            <div class="form-section">
+                <h3>👤 基本信息</h3>
+                <div class="form-group">
+                    <label>姓名</label>
+                    <input type="text" id="name" value="">
+                </div>
+                <div class="form-group">
+                    <label>职位</label>
+                    <input type="text" id="position" value="">
+                </div>
+                <div class="form-group">
+                    <label>电话</label>
+                    <input type="text" id="phone" value="">
+                </div>
+                <div class="form-group">
+                    <label>邮箱</label>
+                    <input type="text" id="email" value="">
+                </div>
+                <div class="form-group">
+                    <label>工作年限</label>
+                    <input type="text" id="workYears" value="">
+                </div>
+                <div class="form-group">
+                    <label>学历</label>
+                    <input type="text" id="education" value="">
+                </div>
+            </div>
+
+            <!-- 核心技能 -->
+            <div class="form-section">
+                <h3>💪 核心技能</h3>
+                <div id="skillsContainer"></div>
+                <button class="btn btn-add" onclick="addSkillCategory()">+ 添加技能类别</button>
+            </div>
+
+            <!-- 工作经历 -->
+            <div class="form-section">
+                <h3>💼 工作经历</h3>
+                <div id="experienceContainer"></div>
+                <button class="btn btn-add" onclick="addExperience()">+ 添加工作经历</button>
+            </div>
+
+            <!-- 教育背景 -->
+            <div class="form-section">
+                <h3>🎓 教育背景</h3>
+                <div class="form-group">
+                    <label>学校</label>
+                    <input type="text" id="school" value="">
+                </div>
+                <div class="form-group">
+                    <label>学历</label>
+                    <input type="text" id="degree" value="">
+                </div>
+                <div class="form-group">
+                    <label>时间</label>
+                    <input type="text" id="eduTime" value="">
+                </div>
+            </div>
+
+            <!-- 证书 -->
+            <div class="form-section">
+                <h3>📜 专业证书</h3>
+                <div class="form-group">
+                    <label>证书列表（用顿号或逗号分隔）</label>
+                    <textarea id="certificates"></textarea>
+                </div>
+            </div>
+
+            <!-- 个人评价 -->
+            <div class="form-section">
+                <h3>✨ 个人评价</h3>
+                <div id="summaryContainer"></div>
+                <button class="btn btn-add" onclick="addSummary()">+ 添加评价</button>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="generateResume()">生成简历</button>
+                <button class="btn btn-secondary" onclick="window.print()">打印简历</button>
+            </div>
+        </div>
+
+        <!-- 预览面板 -->
+        <div class="preview-panel" id="resumePreview">
+            <div style="padding: 40px; text-align: center; color: #999;">
+                点击"生成简历"按钮预览效果
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 数据存储
+        let skillCategories = [];
+        let experiences = [];
+        let summaries = [];
+
+        // 颜色选择器同步
+        ['color1', 'color2', 'color3', 'color4'].forEach(id => {
+            const colorInput = document.getElementById(id);
+            const textInput = document.getElementById(id + 'Text');
+            
+            colorInput.addEventListener('input', (e) => {
+                textInput.value = e.target.value;
+            });
+            
+            textInput.addEventListener('input', (e) => {
+                if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                    colorInput.value = e.target.value;
+                }
+            });
+        });
+
+        // ========== 技能管理 ==========
+        function addSkillCategory() {
+            const id = Date.now();
+            skillCategories.push({ 
+                id, 
+                category: '',
+                skills: []
+            });
+            renderSkills();
+        }
+
+        function renderSkills() {
+            const container = document.getElementById('skillsContainer');
+            container.innerHTML = skillCategories.map((cat, catIndex) => `
+                <div class="dynamic-item">
+                    <div class="item-header">
+                        <h4>技能类别 ${catIndex + 1}</h4>
+                        <button class="btn btn-remove" onclick="removeSkillCategory(${cat.id})">删除</button>
+                    </div>
+                    <div class="form-group">
+                        <label>类别名称</label>
+                        <input type="text" value="${cat.category}" 
+                               onchange="skillCategories[${catIndex}].category = this.value"
+                               placeholder="例如：测试专项能力">
+                    </div>
+                    <div class="list-input-group">
+                        <label>技能列表</label>
+                        ${cat.skills.map((skill, skillIndex) => `
+                            <div class="list-input-item">
+                                <input type="text" value="${skill.name}" 
+                                       onchange="skillCategories[${catIndex}].skills[${skillIndex}].name = this.value"
+                                       placeholder="技能名称，例如：功能测试" style="flex: 0.3;">
+                                <input type="text" value="${skill.desc}" 
+                                       onchange="skillCategories[${catIndex}].skills[${skillIndex}].desc = this.value"
+                                       placeholder="技能描述，例如：精通 C 端、B 端测试">
+                                <button onclick="removeSkill(${catIndex}, ${skillIndex}); renderSkills();">删除</button>
+                            </div>
+                        `).join('')}
+                        <button class="btn-add-small" onclick="addSkill(${catIndex})">+ 添加技能</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addSkill(catIndex) {
+            skillCategories[catIndex].skills.push({ name: '', desc: '' });
+            renderSkills();
+        }
+
+        function removeSkill(catIndex, skillIndex) {
+            skillCategories[catIndex].skills.splice(skillIndex, 1);
+        }
+
+        function removeSkillCategory(id) {
+            skillCategories = skillCategories.filter(c => c.id !== id);
+            renderSkills();
+        }
+
+        // ========== 工作经历管理 ==========
+        function addExperience() {
+            const id = Date.now();
+            experiences.push({
+                id,
+                company: '',
+                position: '',
+                duration: '',
+                projects: []
+            });
+            renderExperiences();
+        }
+
+        function renderExperiences() {
+            const container = document.getElementById('experienceContainer');
+            container.innerHTML = experiences.map((exp, expIndex) => `
+                <div class="dynamic-item">
+                    <div class="item-header">
+                        <h4>工作经历 ${expIndex + 1}</h4>
+                        <button class="btn btn-remove" onclick="removeExperience(${exp.id})">删除</button>
+                    </div>
+                    <div class="form-group">
+                        <label>公司名称</label>
+                        <input type="text" value="${exp.company}" 
+                               onchange="experiences[${expIndex}].company = this.value"
+                               placeholder="例如：Bilibili 项目（微创科技驻场）">
+                    </div>
+                    <div class="form-group">
+                        <label>职位</label>
+                        <input type="text" value="${exp.position}" 
+                               onchange="experiences[${expIndex}].position = this.value"
+                               placeholder="例如：软件测试工程师">
+                    </div>
+                    <div class="form-group">
+                        <label>在职时间</label>
+                        <input type="text" value="${exp.duration}" 
+                               onchange="experiences[${expIndex}].duration = this.value"
+                               placeholder="例如：2024.03 - 2025.03">
+                    </div>
+                    
+                    <div style="margin-top: 15px;">
+                        <label style="font-weight: bold; color: #607052;">项目列表</label>
+                        ${exp.projects.map((proj, projIndex) => `
+                            <div class="nested-item">
+                                <div class="item-header">
+                                    <h4>项目 ${projIndex + 1}: ${proj.name || '未命名'}</h4>
+                                    <button class="btn btn-remove" onclick="removeProject(${expIndex}, ${projIndex})">删除项目</button>
+                                </div>
+                                <div class="form-group">
+                                    <label>项目名称</label>
+                                    <input type="text" value="${proj.name}" 
+                                           onchange="experiences[${expIndex}].projects[${projIndex}].name = this.value"
+                                           placeholder="">
+                                </div>
+                                <div class="form-group">
+                                    <label>项目类型</label>
+                                    <input type="text" value="${proj.type}" 
+                                           onchange="experiences[${expIndex}].projects[${projIndex}].type = this.value"
+                                           placeholder="">
+                                </div>
+                                <div class="form-group">
+                                    <label>负责业务</label>
+                                    <textarea onchange="experiences[${expIndex}].projects[${projIndex}].business = this.value"
+                                              placeholder="">${proj.business}</textarea>
+                                </div>
+                                <div class="list-input-group">
+                                    <label>工作职责</label>
+                                    ${proj.duties.map((duty, dutyIndex) => `
+                                        <div class="list-input-item">
+                                            <input type="text" value="${duty}" 
+                                                   onchange="experiences[${expIndex}].projects[${projIndex}].duties[${dutyIndex}] = this.value"
+                                                   placeholder="输入一条工作职责">
+                                            <button onclick="removeDuty(${expIndex}, ${projIndex}, ${dutyIndex})">删除</button>
+                                        </div>
+                                    `).join('')}
+                                    <button class="btn-add-small" onclick="addDuty(${expIndex}, ${projIndex})">+ 添加职责</button>
+                                </div>
+                                
+                                <div class="checkbox-group">
+                                    <label>
+                                        <input type="checkbox" ${proj.hasTechContribution ? 'checked' : ''}
+                                               onchange="toggleTechContribution(${expIndex}, ${projIndex}, this.checked)">
+                                        添加技术贡献
+                                    </label>
+                                </div>
+                                
+                                ${proj.hasTechContribution ? `
+                                    <div style="margin-top: 10px; padding: 10px; background: #fff; border-radius: 4px;">
+                                        ${proj.techContributions.map((tech, techIndex) => `
+                                            <div style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
+                                                <div class="form-group">
+                                                    <label>技术贡献标题</label>
+                                                    <input type="text" value="${tech.title}" 
+                                                           onchange="experiences[${expIndex}].projects[${projIndex}].techContributions[${techIndex}].title = this.value"
+                                                           placeholder="例如：测试数据管理平台">
+                                                </div>
+                                                <div class="list-input-group">
+                                                    <label>贡献详情</label>
+                                                    ${tech.items.map((item, itemIndex) => `
+                                                        <div class="list-input-item">
+                                                            <input type="text" value="${item}" 
+                                                                   onchange="experiences[${expIndex}].projects[${projIndex}].techContributions[${techIndex}].items[${itemIndex}] = this.value"
+                                                                   placeholder="输入技术贡献详情">
+                                                            <button onclick="removeTechItem(${expIndex}, ${projIndex}, ${techIndex}, ${itemIndex})">删除</button>
+                                                        </div>
+                                                    `).join('')}
+                                                    <button class="btn-add-small" onclick="addTechItem(${expIndex}, ${projIndex}, ${techIndex})">+ 添加详情</button>
+                                                </div>
+                                                <button class="btn btn-remove" style="margin-top: 5px;" 
+                                                        onclick="removeTechContribution(${expIndex}, ${projIndex}, ${techIndex})">删除此技术贡献</button>
+                                            </div>
+                                        `).join('')}
+                                        <button class="btn-add-small" onclick="addTechContribution(${expIndex}, ${projIndex})">+ 添加技术贡献</button>
+                                    </div>
+                                ` : ''}
+                                
+                                <div class="form-group" style="margin-top: 10px;">
+                                    <label>项目成果</label>
+                                    <textarea onchange="experiences[${expIndex}].projects[${projIndex}].achievement = this.value"
+                                              placeholder="描述项目取得的成果">${proj.achievement}</textarea>
+                                </div>
+                            </div>
+                        `).join('')}
+                        <button class="btn-add-small" onclick="addProject(${expIndex})">+ 添加项目</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addProject(expIndex) {
+            experiences[expIndex].projects.push({
+                name: '',
+                type: '',
+                business: '',
+                duties: [],
+                hasTechContribution: false,
+                techContributions: [],
+                achievement: ''
+            });
+            renderExperiences();
+        }
+
+        function removeProject(expIndex, projIndex) {
+            experiences[expIndex].projects.splice(projIndex, 1);
+            renderExperiences();
+        }
+
+        function addDuty(expIndex, projIndex) {
+            experiences[expIndex].projects[projIndex].duties.push('');
+            renderExperiences();
+        }
+
+        function removeDuty(expIndex, projIndex, dutyIndex) {
+            experiences[expIndex].projects[projIndex].duties.splice(dutyIndex, 1);
+            renderExperiences();
+        }
+
+        function toggleTechContribution(expIndex, projIndex, checked) {
+            experiences[expIndex].projects[projIndex].hasTechContribution = checked;
+            if (checked && experiences[expIndex].projects[projIndex].techContributions.length === 0) {
+                experiences[expIndex].projects[projIndex].techContributions.push({
+                    title: '',
+                    items: []
+                });
+            }
+            renderExperiences();
+        }
+
+        function addTechContribution(expIndex, projIndex) {
+            experiences[expIndex].projects[projIndex].techContributions.push({
+                title: '',
+                items: []
+            });
+            renderExperiences();
+        }
+
+        function removeTechContribution(expIndex, projIndex, techIndex) {
+            experiences[expIndex].projects[projIndex].techContributions.splice(techIndex, 1);
+            renderExperiences();
+        }
+
+        function addTechItem(expIndex, projIndex, techIndex) {
+            experiences[expIndex].projects[projIndex].techContributions[techIndex].items.push('');
+            renderExperiences();
+        }
+
+        function removeTechItem(expIndex, projIndex, techIndex, itemIndex) {
+            experiences[expIndex].projects[projIndex].techContributions[techIndex].items.splice(itemIndex, 1);
+            renderExperiences();
+        }
+
+        function removeExperience(id) {
+            experiences = experiences.filter(e => e.id !== id);
+            renderExperiences();
+        }
+
+        // ========== 个人评价管理 ==========
+        function addSummary() {
+            const id = Date.now();
+            summaries.push({ id, title: '', content: '' });
+            renderSummaries();
+        }
+
+        function renderSummaries() {
+            const container = document.getElementById('summaryContainer');
+            container.innerHTML = summaries.map((summary, index) => `
+                <div class="dynamic-item">
+                    <div class="item-header">
+                        <h4>评价 ${index + 1}</h4>
+                        <button class="btn btn-remove" onclick="removeSummary(${summary.id})">删除</button>
+                    </div>
+                    <div class="form-group">
+                        <label>标题</label>
+                        <input type="text" value="${summary.title}" 
+                               onchange="summaries[${index}].title = this.value"
+                               placeholder="例如：全链路质量守护者">
+                    </div>
+                    <div class="form-group">
+                        <label>内容</label>
+                        <textarea onchange="summaries[${index}].content = this.value"
+                                  placeholder="描述你的优势和特点">${summary.content}</textarea>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function removeSummary(id) {
+            summaries = summaries.filter(s => s.id !== id);
+            renderSummaries();
+        }
+
+        // ========== 生成简历 ==========
+        function generateResume() {
+            const colors = {
+                primary: document.getElementById('color1').value,
+                secondary: document.getElementById('color2').value,
+                background: document.getElementById('color3').value,
+                accent: document.getElementById('color4').value
+            };
+
+            const basic = {
+                name: document.getElementById('name').value,
+                position: document.getElementById('position').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                workYears: document.getElementById('workYears').value,
+                education: document.getElementById('education').value
+            };
+
+            const edu = {
+                school: document.getElementById('school').value,
+                degree: document.getElementById('degree').value,
+                time: document.getElementById('eduTime').value
+            };
+
+            const certificates = document.getElementById('certificates').value;
+
+            const html = `
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${basic.name} - ${basic.position}简历</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: "Microsoft YaHei", Arial, sans-serif; line-height: 1.6; color: #333; background: #f5f5f5; padding: 20px; }
+        .resume-container { max-width: 900px; margin: 0 auto; background: white; box-shadow: 0 0 10px rgba(0,0,0,0.08); }
+        .header { background: linear-gradient(135deg, ${colors.primary}dd 0%, ${colors.secondary}dd 100%); color: white; padding: 35px 40px; text-align: center; }
+        .header h1 { font-size: 34px; margin-bottom: 8px; }
+        .header .job-title { font-size: 19px; margin-bottom: 15px; }
+        .contact-info { display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; font-size: 14px; }
+        .contact-item { display: flex; align-items: center; gap: 5px; }
+        .content { padding: 35px 40px; }
+        .section { margin-bottom: 30px; }
+        .section-title { font-size: 22px; color: ${colors.primary}e6; border-bottom: 2px solid ${colors.secondary}99; padding-bottom: 8px; margin-bottom: 20px; font-weight: bold; }
+        .skill-category { margin-bottom: 12px; }
+        .skill-category-title { font-weight: bold; color: ${colors.primary}dd; margin-bottom: 8px; font-size: 16px; }
+        .skill-list { padding-left: 20px; color: #374151; }
+        .skill-list li { margin-bottom: 7px; line-height: 1.8; font-size: 15px; }
+        .experience-item { margin-bottom: 25px; padding: 22px; border: 1px solid ${colors.background}cc; background: ${colors.background}66; }
+        .experience-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid ${colors.secondary}80; }
+        .company-name { font-size: 18px; font-weight: bold; color: ${colors.primary}e6; }
+        .job-position { color: ${colors.secondary}dd; font-weight: 600; }
+        .duration { color: #6b7280; font-size: 14px; white-space: nowrap; }
+        .project-name { font-weight: bold; color: ${colors.primary}dd; margin: 14px 0 10px 0; font-size: 16px; }
+        .project-info { margin-bottom: 12px; color: #374151; line-height: 1.7; font-size: 15px; }
+        .responsibility-list { padding-left: 20px; color: #374151; }
+        .responsibility-list li { margin-bottom: 8px; line-height: 1.7; font-size: 15px; }
+        .tech-stack { display: inline-block; background: ${colors.background}99; color: ${colors.primary}dd; padding: 3px 10px; border-radius: 4px; font-size: 13px; margin: 2px; border: 1px solid ${colors.secondary}80; }
+        .achievement { background: ${colors.background}80; padding: 12px; border-left: 3px solid ${colors.accent}99; margin: 12px 0; font-size: 15px; color: #374151; }
+        .education { display: flex; justify-content: space-between; padding: 8px 0; }
+        .summary-section { background: ${colors.background}66; padding: 20px; border: 1px solid ${colors.background}cc; }
+        .summary-item { margin-bottom: 12px; padding-left: 18px; position: relative; color: #374151; line-height: 1.8; font-size: 15px; }
+        .summary-item:before { content: "●"; position: absolute; left: 0; color: ${colors.secondary}b3; }
+        @media print { body { background: white; padding: 0; } .resume-container { box-shadow: none; } .experience-item { page-break-inside: avoid; } }
+    </style>
+</head>
+<body>
+    <div class="resume-container">
+        <div class="header">
+            <h1>${basic.name}</h1>
+            <div class="job-title">${basic.position}</div>
+            <div class="contact-info">
+                <div class="contact-item">📱 ${basic.phone}</div>
+                <div class="contact-item">📧 ${basic.email}</div>
+                <div class="contact-item">💼 工作年限：${basic.workYears}</div>
+                <div class="contact-item">🎓 ${basic.education}</div>
+            </div>
+        </div>
+        <div class="content">
+            ${skillCategories.length > 0 ? `
+            <div class="section">
+                <h2 class="section-title">核心技能</h2>
+                ${skillCategories.map(cat => `
+                    <div class="skill-category">
+                        <div class="skill-category-title">${cat.category}</div>
+                        <ul class="skill-list">
+                            ${cat.skills.filter(s => s.name && s.desc).map(skill => 
+                                `<li><strong>${skill.name}：</strong>${skill.desc}</li>`
+                            ).join('')}
+                        </ul>
+                    </div>
+                `).join('')}
+            </div>
+            ` : ''}
+            
+            ${experiences.length > 0 ? `
+            <div class="section">
+                <h2 class="section-title">工作经历</h2>
+                ${experiences.map(exp => `
+                    <div class="experience-item">
+                        <div class="experience-header">
+                            <div>
+                                <span class="company-name">${exp.company}</span>
+                                <span class="job-position"> | ${exp.position}</span>
+                            </div>
+                            <span class="duration">${exp.duration}</span>
+                        </div>
+                        ${exp.projects.map(proj => `
+                            ${proj.name ? `<div class="project-name">${proj.name}</div>` : ''}
+                            ${proj.type || proj.business ? `
+                            <div class="project-info">
+                                ${proj.type ? `<strong>项目类型：</strong>${proj.type}<br>` : ''}
+                                ${proj.business ? `<strong>负责业务：</strong>${proj.business}` : ''}
+                            </div>
+                            ` : ''}
+                            ${proj.duties.filter(d => d).length > 0 ? `
+                            <div style="margin-top: 10px;"><strong>工作职责：</strong></div>
+                            <ul class="responsibility-list">
+                                ${proj.duties.filter(d => d).map(duty => `<li>${duty}</li>`).join('')}
+                            </ul>
+                            ` : ''}
+                            ${proj.hasTechContribution && proj.techContributions.length > 0 ? `
+                                <div style="margin-top: 15px;"><strong>🛠️ 技术贡献</strong></div>
+                                ${proj.techContributions.map((tc, i) => `
+                                    ${tc.title ? `<p style="margin: ${i === 0 ? '10px' : '15px'} 0 10px 0; font-weight: bold;">${i + 1}. ${tc.title}</p>` : ''}
+                                    ${tc.items.filter(item => item).length > 0 ? `
+                                    <ul class="responsibility-list">
+                                        ${tc.items.filter(item => item).map(item => `<li>${item}</li>`).join('')}
+                                    </ul>
+                                    ` : ''}
+                                `).join('')}
+                            ` : ''}
+                            ${proj.achievement ? `<div class="achievement">📊 项目成果：${proj.achievement}</div>` : ''}
+                        `).join('')}
+                    </div>
+                `).join('')}
+            </div>
+            ` : ''}
+            
+            <div class="section">
+                <h2 class="section-title">教育背景</h2>
+                <div class="education">
+                    <div><strong>${edu.school}</strong> | ${edu.degree}</div>
+                    <div class="duration">${edu.time}</div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">专业证书</h2>
+                <p style="color: #4a5568;">${certificates}</p>
+            </div>
+            
+            ${summaries.length > 0 ? `
+            <div class="section">
+                <h2 class="section-title">个人评价</h2>
+                <div class="summary-section">
+                    ${summaries.filter(s => s.title && s.content).map(s => `
+                        <div class="summary-item">
+                            <strong>${s.title}：</strong>${s.content}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            ` : ''}
+        </div>
+    </div>
+</body>
+</html>
+            `;
+
+            document.getElementById('resumePreview').innerHTML = html;
+        }
+
+        // 初始化示例数据
+        function initSampleData() {
+            // 不加载任何示例数据，让用户从空白开始
+        }
+
+        // 页面加载
+        window.onload = () => {
+            initSampleData();
+        };
+    </script>
+</body>
+</html>
